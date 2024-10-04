@@ -1,0 +1,83 @@
+<div class="container">
+  <h1 class="text-center">
+    <%= title %>
+  </h1>
+  <div class="row">
+    <div class="col-md-4 col-lg-3">
+      <form name="frm" class="input-group mb-2">
+        <input name="query" class="form-control" value="github">
+        <button class="btn btn-primary">검색</button>
+      </form>
+    </div>
+  </div>
+  <div id="div_list"></div>
+  <div class="text-center">
+    <button id="prev" class="btn btn-primary btn-sm">이전</button>
+    <span id="page" class="mx-3">1</span>
+    <button id="next" class="btn btn-primary btn-sm">다음</button>
+  </div>
+  <script id="temp_list" type="x-handlebars-template">
+    <table class="table">
+      {{#each documents}}
+      <tr>
+        <td><a href="{{url}}">{{{title}}}</a></td>
+        <td>{{blogname}}</td>
+      </tr>
+      {{/each}}
+    </table>
+  </script>
+</div>
+
+<script>
+  let query = "github";
+  let page = 1;
+  let size = 10;
+
+  getList();
+  function getList() {
+    $.ajax({
+      type: "get",
+      url: "https://dapi.kakao.com/v2/search/blog.json",
+      data: { query, page, size },
+      headers: { "Authorization": "KakaoAK 54b6688221dead45827042df7e297c2d" },
+      success: function (data) {
+        console.log(data);
+        const temp = Handlebars.compile($("#temp_list").html());
+        $("#div_list").html(temp(data));
+
+        $("#total").html(data.meta.pageable_count);
+        const last = Math.ceil(data.meta.pageable_count / size);
+        $("#page").html(`${page}/${last}`);
+        if (page == 1) $("#prev").attr("disabled", true);
+        else $("#prev").attr("disabled", false);
+
+        const is_end = data.meta.is_end;
+        if (is_end) $("#next").attr("disabled", true);
+        else $("#next").attr("disabled", false);
+      }
+    });
+  }
+
+  $(frm).on("submit", function (e) {
+    e.preventDefault();
+    if ($(frm.query).val() == "") {
+      alert("검색어를 입력하세요!");
+      $(frm.query).focus();
+      return;
+    }
+    page = 1;
+    query = $(frm.query).val();
+    getList();
+
+  });
+
+  $("#prev").on("click", function () {
+    page--;
+    getList();
+  });
+
+  $("#next").on("click", function () {
+    page++;
+    getList();
+  });
+</script>

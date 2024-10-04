@@ -1,0 +1,73 @@
+<div class="row my-5 justify-content-center">
+  <div class="col-10 col-md-6 col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h3>
+          <%=title%>
+        </h3>
+      </div>
+      <div class="card-body">
+        <form name="frm" class="d-flex flex-column gap-3">
+          <div class="form-group">
+            <label for="uid">아이디</label>
+            <input type="text" class="form-control" id="uid" name="uid" placeholder="아이디를 입력하세요" value="test@test.test">
+          </div>
+          <div class="form-group">
+            <label for="pwd">비밀번호</label>
+            <input type="password" class="form-control" id="pwd" name="pwd" placeholder="비밀번호를 입력하세요" value="testtest">
+          </div>
+          <button type="button" class="btn btn-primary">로그인</button>
+          <a href="/users/join" class="text-end">회원가입</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7xvDG79QetYQJjRBEqKIj7O_---1a-CA",
+    authDomain: "inha-48be0.firebaseapp.com",
+    projectId: "inha-48be0",
+    storageBucket: "inha-48be0.appspot.com",
+    messagingSenderId: "535435308843",
+    appId: "1:535435308843:web:9caf8947add3cd38421f6e",
+    measurementId: "G-JX62ZCZV81"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  function login() {
+    const uid = document.getElementById('uid').value;
+    const pwd = document.getElementById('pwd').value;
+    if (uid === '' || pwd === '') {
+      alert('아이디와 비밀번호를 입력하세요');
+      return;
+    }
+    signInWithEmailAndPassword(auth, uid, pwd)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        alert('로그인 성공');
+        location.href = '/';
+        sessionStorage.setItem('email', user.email);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        alert('로그인 실패: ' + errorMessage);
+      });
+  }
+  document.querySelector('button').addEventListener('click', login);
+</script>
