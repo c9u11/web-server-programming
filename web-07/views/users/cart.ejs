@@ -1,0 +1,41 @@
+<div class="my-5">
+  <h1 class="text-center">
+    <%=title%>
+  </h1>
+  <div id="cart-list">
+
+  </div>
+</div>
+
+<script type="module">
+  import { app } from '/javascripts/config.js'
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+  const db = getDatabase(app);
+
+  onValue(ref(db, `cart/${uid}`), (snapshot) => {
+    const cart = snapshot.val();
+    console.log(cart);
+    if (cart) {
+      let html = "";
+      for (const key in cart) {
+        const item = cart[key];
+        html += `
+        <div class="row mb-3">
+          <div class="col-3">
+            <img src="${item.thumbnail}" width="100%">
+          </div>
+          <div class="col-9">
+            <h5>${item.title}</h5>
+            <div>ISBN: ${item.isbn}</div>
+            <div>가격: ${item.price}원</div>
+            <div>저자: ${item.authors}</div>
+            <div>출판사: ${item.publisher}</div>
+          </div>
+        </div>
+        `;
+      }
+      $("#cart-list").html(html);
+    }
+  });
+
+</script>
