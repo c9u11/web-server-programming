@@ -2,7 +2,9 @@
     <div class="col-10 col-md-6 col-lg-4">
         <div class="card">
             <div class="card-header">
-                <h3><%=title%></h3>
+                <h3>
+                    <%=title%>
+                </h3>
             </div>
             <div class="card-body">
                 <form name="frm">
@@ -18,23 +20,23 @@
     </div>
 </div>
 <script type="module">
-    import {app} from '/javascripts/config.js';
-    import {getAuth,  createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { app } from '/javascripts/config.js';
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     const auth = getAuth(app);
 
     // 회원가입 버튼을 클릭한 경우
-    $(frm).on("submit", function(e) {
+    $(frm).on("submit", function (e) {
         e.preventDefault();
         const email = $(frm.email).val();
         const pass = $(frm.pass).val();
 
         createUserWithEmailAndPassword(auth, email, pass)
-        .then((userCredential) => {
-            alert("회원가입 성공!");
-            location.href = "/users/login";
-        })
-        .catch((error) => {
-            alert("회원가입 실패!" + error.message);
-        });
+            .then((userCredential) => {
+                alert("회원가입 성공!");
+                location.href = "/users/login";
+            })
+            .catch((error) => {
+                alert("회원가입 실패!" + error.message);
+            });
     });
 </script>

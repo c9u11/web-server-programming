@@ -8,8 +8,8 @@
             </div>
             <div class="card-body">
                 <form name="frm">
-                    <input type="text" class="form-control mb-3" name="email" value="blue@test.com">
-                    <input type="password" class="form-control mb-3" name="pass" value="12341234">
+                    <input type="text" class="form-control mb-3" name="email" value="test@test.test">
+                    <input type="password" class="form-control mb-3" name="pass" value="testtest">
                     <button class="btn btn-primary w-100">로그인</button>
                 </form>
                 <div class="text-end mt-3">
@@ -33,6 +33,7 @@
             .then((userCredential) => {
                 alert("로그인 성공!");
                 sessionStorage.setItem("email", email);
+                sessionStorage.setItem("uid", userCredential.user.uid)
                 if (sessionStorage.getItem("target")) {
                     location.href = sessionStorage.getItem("target");
                 } else {

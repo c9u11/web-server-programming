@@ -1,5 +1,7 @@
 <div>
-    <h1 class="text-center my-5"><%=title%></h1>
+    <h1 class="text-center my-5">
+        <%=title%>
+    </h1>
     <div class="row">
         <div class="col-md-4 mb-3">
             <form name="frm">
@@ -31,91 +33,91 @@
         </table>
     </script>
     <script>
-        Handlebars.registerHelper("funThumbnail", function(thumbnail){
-            if(thumbnail) return thumbnail;
+        Handlebars.registerHelper("funThumbnail", function (thumbnail) {
+            if (thumbnail) return thumbnail;
             else return "/images/no_image.png";
         })
     </script>
     <script>
-        Handlebars.registerHelper("strBook", function(book){
-          return JSON.stringify(book);
+        Handlebars.registerHelper("strBook", function (book) {
+            return JSON.stringify(book);
         });
     </script>
 </div>
 <script type="module">
-    import {app} from '/javascripts/config.js';
-    import {getDatabase, ref, set, get} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    import { app } from '/javascripts/config.js';
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
     const db = getDatabase(app);
 
-    let query=$(frm.query).val();
-    let page=1;
-    let size=5;
+    let query = $(frm.query).val();
+    let page = 1;
+    let size = 5;
 
     getList();
 
     //다음버튼을 클릭한 경우
-    $("#next").on("click", function(){
+    $("#next").on("click", function () {
         page++;
         getList();
     });
 
     //이전버튼을 클릭한 경우
-    $("#prev").on("click", function(){
+    $("#prev").on("click", function () {
         page--;
         getList();
     });
 
     //폼이 Submit되는 경우
-    $(frm).on("submit", function(e){
+    $(frm).on("submit", function (e) {
         e.preventDefault();
         query = $(frm.query).val();
-        if(query == "") {
+        if (query == "") {
             alert("검색어를 입력하세요!");
-        }else{
+        } else {
             getList();
         }
     });
 
     //장바구니 버튼을 클릭한 경우
-    $("#div_list").on("click", ".cart",async function(){
-        if(uid){
+    $("#div_list").on("click", ".cart", async function () {
+        if (uid) {
             const book = JSON.parse($(this).attr("book"));
             console.log(book);
             const ref_cart = ref(db, `cart/${uid}/${book.isbn}`);
             const snapshot = await get(ref_cart)
-            if(snapshot.val()){
+            if (snapshot.val()) {
                 alert("장바구니에 이미 존재하는 도서입니다.");
-            }else{
+            } else {
                 await set(ref_cart, book);
                 alert("장바구니에 등록되었습니다.")
             }
-        }else{
+        } else {
             sessionStorage.setItem("target", window.location.href);
-            location.href="/users/login";
+            location.href = "/users/login";
         }
     });
 
     //도서목록 함수
-    function getList(){
+    function getList() {
         $.ajax({
-            type:"get",
-            url:"https://dapi.kakao.com/v3/search/book?target=title",
-            data: {query:query, size:size, page:page},
-            headers:{
+            type: "get",
+            url: "https://dapi.kakao.com/v3/search/book?target=title",
+            data: { query: query, size: size, page: page },
+            headers: {
                 "Authorization": "KakaoAK 7dc21d5852274d162cc3c15163505083"
             },
-            success:function(data){
+            success: function (data) {
                 console.log(data);
-                const temp=Handlebars.compile($("#temp_list").html());
+                const temp = Handlebars.compile($("#temp_list").html());
                 $("#div_list").html(temp(data));
 
-                const last = Math.ceil(data.meta.pageable_count/size);
+                const last = Math.ceil(data.meta.pageable_count / size);
                 $("#page").html(page + "/" + last);
 
-                if(page==1) $("#prev").attr("disabled", true)
+                if (page == 1) $("#prev").attr("disabled", true)
                 else $("#prev").attr("disabled", false)
-            
-                if(data.meta.is_end) $("#next").attr("disabled", true)
+
+                if (data.meta.is_end) $("#next").attr("disabled", true)
                 else $("#next").attr("disabled", false)
             }
         });

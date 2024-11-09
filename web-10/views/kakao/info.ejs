@@ -1,0 +1,96 @@
+<style>
+    i {
+        font-size: 30px;
+        cursor: pointer;
+    }
+</style>
+<div class="row my-5 justify-content-center p-3">
+    <h1 class="text-center mb-5">
+        <%=title%>
+    </h1>
+    <div class="col-md-10 card mb-3">
+        <div class="row card-body p-3">
+            <div class="col-lg-4 mb-3 text-center">
+                <img src=<%=info.thumbnail%> width="80%">
+            </div>
+            <div class="col align-self-center">
+                <h5>
+                    <%=info.title%>
+                        <i id="heart" class="bi-heart text-danger d-none"></i>
+                </h5>
+                <hr>
+                <div class="mb-3">ISBN: <%=info.isbn%>
+                </div>
+                <div class="mb-3">가격: <%=info.price%>원</div>
+                <div class="mb-3">저자: <%=info.authors%>
+                </div>
+                <div class="mb-3">출판사: <%=info.publisher%>원</div>
+                <div class="my-3">
+                    <button class="btn btn-success px-5 cart">장바구니</button>
+                    <button class="btn btn-warning px-5">바로구매</button>
+                </div>
+            </div>
+            <hr>
+            <div>
+                <%=info.contents%>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10 card py-3">
+        <%-include('review.ejs')%>
+    </div>
+</div>
+
+<script type="module">
+    import { app } from '/javascripts/config.js'
+    import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    const db = getDatabase(app);
+
+    const info = JSON.parse("<%=JSON.stringify(info)%>".replaceAll('&#34;', "\""));
+
+    if (uid) {
+        $("#heart").removeClass("d-none");
+    }
+
+    $("#heart").on("click", function () {
+        if ($(this).hasClass("bi-heart")) {
+            if (confirm("찜목록에 추가하시겠습니까?")) {
+                set(ref(db, `favorite/${uid}/${info.isbn}`), info);
+                alert("찜목록에 추가되었습니다.");
+                $(this).removeClass("bi-heart").addClass("bi-heart-fill");
+            }
+        }
+        else {
+            if (confirm("찜목록에서 삭제하시겠습니까?")) {
+                remove(ref(db, `favorite/${uid}/${info.isbn}`));
+                $(this).removeClass("bi-heart-fill").addClass("bi-heart");
+            }
+        }
+    })
+
+    onValue(ref(db, `favorite/${uid}/${info.isbn}`), (snapshot) => {
+        const isFavorite = snapshot.exists();
+        if (isFavorite) {
+            $("#heart").removeClass("bi-heart").addClass("bi-heart-fill");
+        } else {
+            $("#heart").removeClass("bi-heart-fill").addClass("bi-heart");
+        }
+    })
+
+    $(".cart").on("click", async () => {
+        if (email) {
+            const snapshot = await get(ref(db, `cart/${uid}/${info.isbn}`))
+            console.log(snapshot);
+            if (snapshot.exists()) {
+                alert("이미 장바구니에 담긴 상품입니다.");
+                return;
+            }
+            await set(ref(db, `cart/${uid}/${info.isbn}`), info);
+            alert("장바구니에 담았습니다.");
+        }
+        else {
+            sessionStorage.setItem("target", location.href);
+            location.href = "/login";
+        }
+    })
+</script>

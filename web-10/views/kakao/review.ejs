@@ -1,0 +1,57 @@
+<div class="row justify-content-center">
+  <div class="col-md-10">
+    <textarea id="contents" class="form-control mb-2" rows="5" placeholder="리뷰를 작성해주세요"></textarea>
+    <button class="btn btn-primary px-5" id="write">리뷰 등록</button>
+  </div>
+</div>
+
+<script type="module">
+
+  import { app } from '/javascripts/config.js'
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import { onSnapshot, where, orderBy, query } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  const db = getFirestore(app);
+  const isbn = "<%=info.isbn%>";
+  const q = query(collection(db, "review"), where("isbn", "==", isbn), orderBy("date", "desc"));
+  onSnapshot(q, (snapshot) => {
+    let rows = [];
+    snapshot.forEach(row => {
+      rows.push({
+        id: row.id,
+        ...row.data()
+      })
+      console.log(rows);
+    })
+  });
+
+  if (uid) {
+    $("#contents").show();
+  }
+  else {
+    $("#contents").hide();
+  }
+
+  $('#write').on("click", async () => {
+    if (uid) {
+      const contents = $('#contents').val();
+      if (contents.trim().length > 0) {
+        const date = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+        await addDoc(collection(db, "review"), {
+          uid: uid,
+          isbn: isbn,
+          contents: contents,
+          date: date
+        });
+        $('#contents').val("");
+      }
+      else {
+        alert("리뷰를 작성해주세요.");
+        return;
+      }
+    }
+    else {
+      sessionStorage.setItem("target", window.location.href);
+      location.href = "/users/login";
+    }
+  })
+</script>
