@@ -1,0 +1,79 @@
+<div class="row mt-5 justify-content-center">
+  <div class="col-md-8">
+    <h1 class="text-center mb-5">
+      <%=title%>
+    </h1>
+    <form name="frm">
+      <div class="input-group mb-3">
+        <div class="title input-group-text justify-content-center"> 이메일 </div>
+        <input class="form-control" name="email" readonly>
+      </div>
+      <div class="input-group mb-3">
+        <div class="title input-group-text justify-content-center"> 성명 </div>
+        <input class="form-control" name="name" value="무기명">
+      </div>
+      <div class="input-group mb-3">
+        <div class="title input-group-text justify-content-center"> 전화 </div>
+        <input class="form-control" name="phone" value="010-0000-0000">
+      </div>
+      <div class="input-group mb-3">
+        <div class="title input-group-text justify-content-center"> 주소 </div>
+        <input class="form-control" name="address1">
+        <button class="btn btn-primary search" type="button">검색</button>
+      </div>
+      <input class="form-control" name="address2" placeholder="상세 주소">
+      <div class="text-center mt-3">
+        <button class="btn btn-primary" type="submit">저장</button>
+        <button class="btn btn-secondary" type="reset">취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { app } from '/javascripts/config.js'
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+  const db = getDatabase(app);
+
+  $(frm.email).val(sessionStorage.getItem('email'));
+
+  onValue(ref(db, `users/${sessionStorage.getItem('uid')}`), (snapshot) => {
+    const user = snapshot.val();
+    if (user) {
+      $(frm.name).val(user.name);
+      $(frm.phone).val(user.phone);
+      $(frm.address1).val(user.address1);
+      $(frm.address2).val(user.address2);
+    }
+  });
+
+  $('.search').on('click', function () {
+    new daum.Postcode({
+      oncomplete: function (data) {
+        const address = data.buildingName != "" ? `${data.address}(${data.buildingName})` : data.address;
+        $(frm.address1).val(address);
+      }
+    }).open();
+  });
+
+  $(frm).on('submit', function (e) {
+    e.preventDefault();
+    if (confirm("저장하시겠습니까?")) {
+      const user = {
+        email: $(frm.email).val(),
+        name: $(frm.name).val(),
+        phone: $(frm.phone).val(),
+        address1: `${$(frm.address1).val()}`,
+        address2: $(frm.address2).val()
+      }
+      set(ref(db, `users/${sessionStorage.getItem('uid')}`), user);
+      alert("저장되었습니다.");
+    }
+  });
+
+  $(frm).on('reset', function () {
+    if (confirm("취소하시겠습니까?")) {
+      location.href = '/users/mypage';
+    }
+  });
+</script>
